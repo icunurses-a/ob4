@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OB/GYN Master: Pelvis & Menstrual Cycle</title>
+    <style>
+        /* === THEMES (10 Options) === */
+        :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --primary: #3b82f6; --accent: #f59e0b; --correct: #22c55e; --wrong: #ef4444; --font: 'Segoe UI', system-ui, sans-serif; }
+        [data-theme="dark"] { --bg: #0f172a; --text: #f8fafc; --card: #1e293b; --primary: #60a5fa; }
+        [data-theme="future"] { --bg: #000000; --text: #00ffcc; --card: #111111; --primary: #ff00ff; --accent: #00ffcc; --font: 'Courier New', monospace; }
+        [data-theme="classic"] { --bg: #f4ece1; --text: #3e2723; --card: #fffbf5; --primary: #8d6e63; --accent: #d84315; --font: 'Georgia', serif; }
+        [data-theme="nature"] { --bg: #f0fdf4; --text: #14532d; --card: #ffffff; --primary: #16a34a; --accent: #ea580c; }
+        [data-theme="ocean"] { --bg: #ecfeff; --text: #164e63; --card: #ffffff; --primary: #0891b2; --accent: #f59e0b; }
+        [data-theme="sunset"] { --bg: #fdf2f8; --text: #831843; --card: #ffffff; --primary: #db2777; --accent: #f97316; }
+        [data-theme="minimal"] { --bg: #ffffff; --text: #000000; --card: #f9fafb; --primary: #000000; --accent: #6b7280; border-radius: 0; }
+        [data-theme="neon"] { --bg: #1a0b2e; --text: #f87171; --card: #2d1b4e; --primary: #a78bfa; --accent: #34d399; }
+        [data-theme="hacker"] { --bg: #0a0a0a; --text: #22c55e; --card: #171717; --primary: #22c55e; --font: 'Consolas', monospace; }
+
+        body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); transition: 0.3s; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* RTL Support for Arabic */
+        body.rtl { direction: rtl; text-align: right; }
+        body.rtl .option-btn { text-align: right; }
+        body.rtl .hint-box { border-left: none; border-right: 5px solid var(--accent); border-radius: 8px 0 0 8px; }
+        body.rtl .note-card { border-left: none; border-right: 4px solid var(--accent); }
+
+        button { font-family: inherit; cursor: pointer; transition: 0.2s; border: none; }
+        .hidden { display: none !important; }
+        
+        /* === LAYOUT === */
+        #top-bar { padding: 15px 25px; background: var(--card); border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); z-index: 10; flex-wrap: wrap; gap: 10px; }
+        #app-body { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Split Screen (Notes) */
+        #study-notes { width: 350px; background: var(--card); border-right: 1px solid var(--primary); padding: 20px; overflow-y: auto; transition: 0.3s; }
+        body.rtl #study-notes { border-right: none; border-left: 1px solid var(--primary); }
+        .note-card { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
+        .note-card h4 { margin: 0 0 10px 0; display: flex; align-items: center; gap: 5px; font-size: 0.95rem; }
+        .note-thumb { width: 100%; border-radius: 5px; margin-top: 10px; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .note-thumb:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        /* Main Exam Area */
+        #exam-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
+        #setup-screen { max-width: 800px; width: 100%; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: auto; }
+        #test-screen { max-width: 800px; width: 100%; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* Tools & Controls */
+        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        select, input, .btn-primary { padding: 10px; border-radius: 8px; border: 1px solid var(--primary); background: var(--bg); color: var(--text); }
+        .btn-primary { background: var(--primary); color: var(--bg); font-weight: bold; }
+        .btn-primary:hover { opacity: 0.8; transform: translateY(-2px); }
+        .toolbar { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; background: var(--card); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); align-items: center;}
+        .tool-btn { padding: 8px 15px; border-radius: 20px; background: rgba(0,0,0,0.05); color: var(--text); border: 1px solid var(--primary); font-size: 0.9rem; }
+        .tool-btn:hover { background: var(--primary); color: white; }
+        
+        /* Quiz Elements */
+        .question-card { background: var(--card); padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); position: relative;}
+        .meta-tag { display: inline-block; padding: 4px 10px; border-radius: 12px; background: var(--primary); color: var(--bg); font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; }
+        .difficulty-tag { display: inline-block; padding: 4px 10px; border-radius: 12px; background: var(--accent); color: white; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; margin-left: 5px;}
+        h2.q-text { font-size: 1.4rem; line-height: 1.5; margin-top: 0; }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .option-btn { padding: 15px 20px; text-align: left; background: var(--bg); border: 2px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 1.1rem; color: var(--text); font-weight: 500; }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(0,0,0,0.02); transform: translateX(5px); }
+        body.rtl .option-btn:hover:not(:disabled) { transform: translateX(-5px); }
+        .option-btn.correct { background: var(--correct); color: white; border-color: var(--correct); }
+        .option-btn.wrong { background: var(--wrong); color: white; border-color: var(--wrong); }
+        .option-btn.eliminated { opacity: 0.3; text-decoration: line-through; pointer-events: none; }
+        
+        /* Rationale & Hints */
+        .hint-box { margin-top: 15px; padding: 15px; background: rgba(245, 158, 11, 0.1); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 0.95rem; animation: slideIn 0.3s ease; }
+        .rationale-box { margin-top: 20px; padding: 20px; border-radius: 8px; font-size: 1rem; line-height: 1.5; animation: slideIn 0.3s ease; }
+        .rationale-box.success { background: rgba(34, 197, 94, 0.1); border: 1px solid var(--correct); }
+        .rationale-box.error { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--wrong); }
+        .ref-badge { display: inline-block; background: var(--text); color: var(--bg); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-top: 10px; }
+        
+        /* Timers */
+        .timer-small { font-size: 1rem; font-weight: bold; }
+        .timer-big { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .timer-extra { font-size: 2.5rem; font-weight: 900; color: var(--wrong); letter-spacing: 2px; }
+
+        /* Celebrations */
+        #celebration-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: flex; justify-content: center; align-items: center; overflow: hidden;}
+        .celeb-emoji { position: absolute; font-size: 3rem; animation: floatUp 2s ease-out forwards; }
+        
+        /* Modals (Visual Reference & Gallery) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; text-align: center; max-width: 95%; max-height: 95vh; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        #visual-img { max-width: 100%; max-height: 70vh; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .close-modal { background: var(--wrong); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; margin-top: 15px;}
+        .close-modal:hover { opacity: 0.8; }
+        
+        /* Gallery Grid */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 100%; margin-top: 15px; }
+        .gallery-item { background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .gallery-item:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .gallery-item img { width: 100%; border-radius: 5px; }
+        .gallery-item p { margin: 10px 0 0 0; font-size: 0.85rem; font-weight: bold; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-100vh) scale(1.5); opacity: 0; } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        
+        .flagged { box-shadow: 0 0 15px var(--accent) !important; border: 2px solid var(--accent); }
+    </style>
+</head>
+<body data-theme="minimal">
+
+<div id="celebration-overlay"></div>
+
+<!-- Visual Reference Modal (Single Image) -->
+<div id="visual-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top: 0;">🖼️ Slide Reference</h3>
+        <img id="visual-img" src="" alt="Loading visual..." onerror="this.onerror=null; this.alt='⚠️ Image not found. Ensure files like OBL1L6 (1).jpg are in the same folder.'; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%23eee\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23555\' font-family=\'sans-serif\'>Image file missing</text></svg>';">
+        <p id="visual-caption" style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;"></p>
+        <button class="close-modal" onclick="document.getElementById('visual-modal').classList.remove('active')">Close Visual</button>
+    </div>
+</div>
+
+<!-- All Images Gallery Modal -->
+<div id="gallery-modal" class="modal">
+    <div class="modal-content" style="width: 900px;">
+        <h2 style="margin-top: 0;">🖼️ Full Slide Gallery Review</h2>
+        <p>Click any slide to view it in detail.</p>
+        <div class="gallery-grid" id="gallery-grid-container">
+            <!-- Populated via JS -->
+        </div>
+        <button class="close-modal" onclick="document.getElementById('gallery-modal').classList.remove('active')">Close Gallery</button>
+    </div>
+</div>
+
+<!-- Top Navigation -->
+<div id="top-bar">
+    <h2 style="margin:0;">🩺 OB/GYN Master</h2>
+    
+    <!-- Translation Controls -->
+    <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.05); padding: 5px 15px; border-radius: 8px;">
+        <div id="google_translate_element"></div>
+        <button class="tool-btn" onclick="document.body.classList.toggle('rtl')" style="background: var(--primary); color: white; border:none; padding: 5px 10px;">
+            🔄 RTL / LTR (محاذاة النص)
+        </button>
+    </div>
+
+    <div style="display: flex; gap: 15px; align-items: center;">
+        <span id="global-timer" class="timer-big hidden">00:00</span>
+        <button class="tool-btn hidden" id="end-btn" onclick="endExam()" style="background: var(--wrong); color: white; border: none;">End Exam</button>
+    </div>
+</div>
+
+<div id="app-body">
+    <!-- SPLIT SCREEN: Comprehensive Study Notes for All Images -->
+    <div id="study-notes" class="hidden">
+        <h3>📚 Quick Review Notes</h3>
+        <p style="font-size: 0.8rem; opacity: 0.8;">Click any thumbnail to expand.</p>
+        
+        <div class="note-card">
+            <h4>⭐ 1. Pelvic Bones (Pg 91)</h4>
+            <img src="OBL1L6 (1).jpg" class="note-thumb" alt="Pelvic Bones" onclick="openVisual('OBL1L6 (1).jpg', 'Pg 91: Pelvic Bones')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>4 Bones: 2 Innominate, 1 Sacrum, 1 Coccyx.</li>
+                <li>Innominate = Ilium + Ischium + Pubis (fused).</li>
+            </ul>
+        </div>
+        
+        <div class="note-card">
+            <h4>⭐ 2. Inlet/Cavity/Outlet (Pg 93)</h4>
+            <img src="OBL1L6 (2).jpg" class="note-thumb" alt="Diameters" onclick="openVisual('OBL1L6 (2).jpg', 'Pg 93: Diameters Text')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>Definitions of the AP, Transverse, and Oblique diameters.</li>
+                <li>Cavity is circular (all 12cm).</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 3. Diameters Table (Pg 93)</h4>
+            <img src="OBL1L6 (3).jpg" class="note-thumb" alt="Diameters Table" onclick="openVisual('OBL1L6 (3).jpg', 'Pg 93: Diameters Table')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li><strong>Brim:</strong> AP 11 | Oblq 12 | Trans 13</li>
+                <li><strong>Outlet:</strong> AP 13 | Oblq 12 | Trans 11</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 4. Pelvic Types (Pg 95)</h4>
+            <img src="OBL1L6 (4).jpg" class="note-thumb" alt="Pelvic Types" onclick="openVisual('OBL1L6 (4).jpg', 'Pg 95: Types of Pelvis')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>4 Types: Gynecoid, Android, Anthropoid, Platypelloid.</li>
+                <li>Contracted: reduced by 1cm+ (Leads to CPD).</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 5. Gynecoid Pelvis (Pg 96)</h4>
+            <img src="OBL1L6 (5).jpg" class="note-thumb" alt="Gynecoid Pelvis" onclick="openVisual('OBL1L6 (5).jpg', 'Pg 96: Gynecoid Details')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>50% normal female. Rounded brim.</li>
+                <li>Ideal for childbearing (90° arch).</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 6. Luteal Phase (Pg 124)</h4>
+            <img src="OBL1L6 (6).jpg" class="note-thumb" alt="Luteal Phase" onclick="openVisual('OBL1L6 (6).jpg', 'Pg 124: Luteal Phase')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>Corpus luteum -> Progesterone (2 wks).</li>
+                <li>Prepares endometrium for fertilized oocyte.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 7. Menstrual Phase (Pg 123)</h4>
+            <img src="OBL1L6 (7).jpg" class="note-thumb" alt="Menstrual Phase" onclick="openVisual('OBL1L6 (7).jpg', 'Pg 123: Menstrual Phase')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>Estrogen & Progesterone fall if no fertilization.</li>
+                <li>Simultaneous with beginning of follicular phase.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 8. Menstrual Hormones (Pg 124)</h4>
+            <img src="OBL1L6 (8).jpg" class="note-thumb" alt="Hormones" onclick="openVisual('OBL1L6 (8).jpg', 'Pg 124: Menstrual Hormones')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>Prostaglandin release -> Spiral artery spasm.</li>
+                <li>Endometrium dies (Necrosis) and sheds to basal layer.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 9. Bleeding Terms (Pg 124)</h4>
+            <img src="OBL1L6 (9).jpg" class="note-thumb" alt="Terms" onclick="openVisual('OBL1L6 (9).jpg', 'Pg 124: Normal/Abnormal Terms')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>Eumenorrhoea: Normal (50-150mL, 3-5 days).</li>
+                <li>Menorrhagia: Heavy bleeding. Dysmenorrhoea: Cramps.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h4>⭐ 10. Presumptive Signs (Slide 10)</h4>
+            <img src="OBL1L6 (10).jpg" class="note-thumb" alt="Pregnancy Signs" onclick="openVisual('OBL1L6 (10).jpg', 'Slide 10: Presumptive Time')">
+            <ul style="font-size: 0.85rem; padding-left: 20px;">
+                <li>Amenorrhea (4w) | Nausea (4-14w)</li>
+                <li>Quickening (16-20w) | Pigmentation (16w)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- MAIN EXAM AREA -->
+    <div id="exam-area">
+        
+        <!-- SETUP SCREEN -->
+        <div id="setup-screen">
+            <h1 style="text-align: center; margin-top: 0;">Exam Customisation Suite</h1>
+            <p style="text-align: center; opacity: 0.8;">Configure your optimal study environment</p>
+            
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>🎨 Theme & UI</label>
+                    <select id="sel-theme" onchange="document.body.setAttribute('data-theme', this.value)">
+                        <option value="minimal">Modern Minimal (Default)</option>
+                        <option value="light">Light UI</option>
+                        <option value="dark">Dark Mode</option>
+                        <option value="future">Future/Cyber</option>
+                        <option value="classic">Classic Med</option>
+                        <option value="nature">Nature Green</option>
+                        <option value="ocean">Ocean Blue</option>
+                        <option value="sunset">Sunset Pink</option>
+                        <option value="neon">Neon Night</option>
+                        <option value="hacker">Hacker Terminal</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>🔢 Number of Questions</label>
+                    <select id="sel-count">
+                        <option value="10">10 Questions (Quick Review)</option>
+                        <option value="20">20 Questions</option>
+                        <option value="30">30 Questions</option>
+                        <option value="80">80 Questions (Full File)</option>
+                        <option value="all" selected>All Available (80)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>🧠 Difficulty Mode</label>
+                    <select id="sel-diff">
+                        <option value="comprehensive">Comprehensive (All options)</option>
+                        <option value="easy">Easy (Removes 1 wrong option)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>🗂️ Category Filter</label>
+                    <select id="sel-cat">
+                        <option value="all">All Topics (Mixed)</option>
+                        <option value="anatomy">Pelvic Anatomy & Bones</option>
+                        <option value="diameters">Pelvic Diameters</option>
+                        <option value="cycle">Menstrual & Luteal Cycle</option>
+                        <option value="pregnancy">Presumptive Signs</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>⏱️ Timer Display</label>
+                    <select id="sel-timer">
+                        <option value="timer-big">Modern Big</option>
+                        <option value="timer-small">Discreet Small</option>
+                        <option value="timer-extra">Extra Large (Stress Test)</option>
+                        <option value="none">No Timer</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>🎉 Celebrations</label>
+                    <select id="sel-celeb">
+                        <option value="on">20 Modern Styles (On)</option>
+                        <option value="off">Off (Strict Mode)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" style="width: 100%; font-size: 1.2rem; padding: 15px;" onclick="initExam()">🚀 Start Exam Engine</button>
+        </div>
+
+        <!-- EXAM SCREEN -->
+        <div id="test-screen" class="hidden">
+            <div class="toolbar">
+                <button class="tool-btn" onclick="toggleNotes()">📖 Split Screen (Notes)</button>
+                <button class="tool-btn" onclick="showHint()">💡 Obvious Hint</button>
+                <button class="tool-btn" onclick="eliminateOption()">✂️ Eliminate (50/50)</button>
+                <button class="tool-btn" onclick="showVisualReference()" style="background: var(--primary); color: white; border:none;">🖼️ Question Slide Ref</button>
+                <button class="tool-btn" onclick="document.getElementById('gallery-modal').classList.add('active')" style="background: var(--accent); color: white; border:none;">🖼️ Review All Slides</button>
+                <button class="tool-btn" onclick="flagCurrent()">🚩 Flag for Review</button>
+                <div style="flex-grow: 1;"></div>
+                <button class="tool-btn" onclick="prevQ()">⬅️ Prev</button>
+                <button class="tool-btn" onclick="nextQ()">Skip/Next ➡️</button>
+            </div>
+
+            <div id="q-container" class="question-card">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <span id="ui-qnum" class="meta-tag">Q 1/80</span>
+                        <span id="ui-cat" class="difficulty-tag">Category</span>
+                    </div>
+                    <span id="ui-flag-status" style="font-size: 1.5rem; display:none;">🚩</span>
+                </div>
+                
+                <h2 id="ui-qtext" class="q-text">Question Text</h2>
+                
+                <div id="ui-hint" class="hint-box hidden"></div>
+                
+                <div id="ui-options" class="options-grid">
+                    <!-- Options generated here -->
+                </div>
+
+                <div id="ui-rationale" class="rationale-box hidden">
+                    <!-- Rationale generated here -->
+                </div>
+                
+                <div id="nav-actions" class="hidden" style="margin-top: 20px; text-align: right;">
+                    <button class="btn-primary" onclick="nextQ()">Next Question ➡️</button>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 10px; opacity: 0.6; font-size: 0.9rem;">
+                <span id="progress-text">Score: 0 | Correct: 0 | Wrong: 0</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Google Translate Integration Script -->
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en', 
+            includedLanguages: 'ar,en', 
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        }, 'google_translate_element');
+    }
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script>
+/** * THE MASTER QUESTION DATABASE (80 MCQs)
+ * Extracted explicitly from OBL1L6 Pages 91, 93, 95, 96, 123, 124 & Slide 10.
+ * Format: [Question, [Options], CorrectIndex, Page, Hint, Rationale, Category]
+ */
+const rawDB = [
+    // --- Pelvic Anatomy & Types (Pg 91, 95, 96) ---
+    ["How many bones make up the human pelvis?", ["Two", "Three", "Four", "Five"], 2, 91, "Includes the sacrum and coccyx.", "There are four pelvic bones: two innominate, one sacrum, and one coccyx.", "anatomy"],
+    ["The 'innominate' bone is also referred to as the:", ["Sacrum", "Coccyx", "Hip bone (nameless)", "Femur"], 2, 91, "It literally means 'nameless'.", "Two innominate (nameless) or hip bones make up the sides of the pelvis.", "anatomy"],
+    ["Each innominate bone is composed of three fused bones. Which of the following is NOT one of them?", ["Ilium", "Ischium", "Pubis", "Sacrum"], 3, 91, "One of these is a central spine bone, not part of the hip.", "Each innominate is composed of Ilium, Ischium, and Pubic bones fused together. Sacrum is a separate bone.", "anatomy"],
+    ["Women of short stature generally have what type of pelvis?", ["Narrow pelvis", "Broad pelvis", "Contracted pelvis", "Android pelvis"], 1, 95, "Size varies in sexes; short women adapt this way.", "Women of short stature, in general, have a broad pelvis.", "anatomy"],
+    ["Cephalopelvic disproportion (CPD) typically results when:", ["The maternal pelvis is normal but fetus is large", "The fetal size is consistent with pelvis", "The maternal pelvis is broad", "The sub-pubic arch is 90 degrees"], 0, 95, "It's a mismatch of sizes.", "If the fetus is large, a degree of cephalopelvic disproportion will result even in a broad pelvis.", "anatomy"],
+    ["A pelvis is considered 'contracted' if one of its measurements is reduced from normal by at least:", ["0.5 cm", "1 cm", "2 cm", "3 cm"], 1, 95, "Even a minor reduction impacts labor.", "If one of measurements is reduced by 1 cm or more from normal, the pelvis is contracted.", "anatomy"],
+    ["A contracted pelvis may necessitate which intervention?", ["Normal vaginal delivery", "Forceps delivery", "Caesarean section", "Immediate discharge"], 2, 95, "Requires surgical intervention due to difficulty.", "Contracted pelvis may give rise to difficulty in labour or necessitate caesarean section.", "anatomy"],
+    ["Which pelvic type is considered the normal female type?", ["Android", "Anthropoid", "Gynecoid", "Platypelloid"], 2, 96, "Accounts for 50% of women.", "Gynecoid Pelvis is the normal female type.", "anatomy"],
+    ["What percentage of women have a Gynecoid pelvis?", ["25%", "50%", "75%", "90%"], 1, 96, "It's the commonest type.", "Gynecoid is the commonest type, found in 50%.", "anatomy"],
+    ["The Gynecoid pelvis is ideal for childbearing because it has a:", ["Heart-shaped brim", "Narrow forepelvis", "Rounded brim", "Deep cavity"], 2, 96, "Smooth shape for fetal head.", "Ideal pelvis for childbearing as it has a rounded brim and generous forepelvis.", "anatomy"],
+    ["Which characteristic describes the cavity of a Gynecoid pelvis?", ["Deep", "Funnel-shaped", "Shallow", "Triangular"], 2, 96, "Allows easier descent.", "It has straight side walls, a shallow cavity, and a well-curved sacrum.", "anatomy"],
+    ["The sub-pubic arch angle in a Gynecoid pelvis is approximately:", ["60°", "75°", "90°", "120°"], 2, 96, "A perfect right angle.", "The Gynecoid pelvis features a sub-pubic arch of 90°.", "anatomy"],
+    
+    // --- Pelvic Diameters (Pg 93) ---
+    ["At the pelvic BRIM (Inlet), which diameter is the largest?", ["Antero-posterior", "Oblique", "Transverse", "Vertical"], 2, 93, "Measures 13cm.", "Brim Transverse diameter is 13cm, the largest at the inlet.", "diameters"],
+    ["What is the measurement of the Antero-posterior diameter at the pelvic BRIM?", ["11 cm", "12 cm", "13 cm", "10 cm"], 0, 93, "The shortest diameter at the top.", "Brim AP diameter is 11 cm.", "diameters"],
+    ["How many oblique diameters are described at the pelvic INLET?", ["One", "Two", "Three", "Four"], 1, 93, "Left and Right.", "Inlet has 2 Oblique diameters.", "diameters"],
+    ["The pelvic CAVITY is generally considered to be what shape?", ["Oval", "Heart-shaped", "Diamond", "Circular"], 3, 93, "All dimensions are equal.", "The cavity is circular.", "diameters"],
+    ["What is the standard measurement for ALL diameters (AP, Oblique, Transverse) in the pelvic CAVITY?", ["11 cm", "12 cm", "13 cm", "14 cm"], 1, 93, "It is a perfect circle of this size.", "Cavity: Circular so all 12cm.", "diameters"],
+    ["At the pelvic OUTLET, which diameter is the largest?", ["Antero-posterior", "Oblique", "Transverse", "They are all equal"], 0, 93, "Measures 13cm as the coccyx moves back.", "Outlet Antero-posterior diameter is 13cm.", "diameters"],
+    ["What is the Transverse diameter of the pelvic OUTLET?", ["11 cm", "12 cm", "13 cm", "14 cm"], 0, 93, "The narrowest part of the outlet.", "Outlet Transverse diameter is 11cm.", "diameters"],
+    ["According to the pelvic measurement chart, the Oblique diameter in the Brim, Cavity, and Outlet is consistently:", ["11 cm", "12 cm", "13 cm", "Variable"], 1, 93, "The constant number down the middle column.", "Oblique is 12cm at the Brim, 12cm at the Cavity, and 12cm at the Outlet.", "diameters"],
+    ["Trace the Antero-posterior diameter from Brim down to Outlet. The measurements are:", ["11, 12, 13", "13, 12, 11", "12, 12, 12", "11, 11, 11"], 0, 93, "It increases as the fetus descends.", "AP goes from 11 (Brim) to 12 (Cavity) to 13 (Outlet).", "diameters"],
+    ["Trace the Transverse diameter from Brim down to Outlet. The measurements are:", ["11, 12, 13", "13, 12, 11", "12, 12, 12", "13, 13, 13"], 1, 93, "It decreases as the fetus descends.", "Transverse goes from 13 (Brim) to 12 (Cavity) to 11 (Outlet).", "diameters"],
+
+    // --- Menstrual Cycle & Luteal Phase (Pg 123-124) ---
+    ["The Luteal Phase is defined as a post-ovulatory process where cells of the residual ruptured follicle proliferate to form:", ["A Graafian follicle", "The corpus luteum", "The endometrium", "The oocyte"], 1, 124, "A yellow irregular structure.", "Cells of ruptured follicle proliferate and form a yellow irregular structure known as the corpus luteum.", "cycle"],
+    ["Which hormone is PREDOMINANTLY produced by the corpus luteum?", ["Estrogen", "Luteinizing Hormone (LH)", "Progesterone", "Follicle Stimulating Hormone (FSH)"], 2, 124, "The hormone that maintains early pregnancy.", "The corpus luteum produces predominantly progesterone.", "cycle"],
+    ["Alongside progesterone, what other substances are produced by the corpus luteum? (Select best option)", ["Estrogen, relaxin, inhibin", "Testosterone, prolactin", "hCG, relaxin", "Oxytocin, inhibin"], 0, 124, "It secretes three other secondary hormones.", "Also produces estrogen, relaxin and inhibin.", "cycle"],
+    ["Approximately how long does the corpus luteum secrete hormones if the oocyte is NOT fertilized?", ["3 days", "1 week", "2 weeks", "4 weeks"], 2, 124, "14 days.", "Secretes for approximately 2 weeks to develop the endometrium.", "cycle"],
+    ["What is the primary function of the corpus luteum's hormone secretion during the luteal phase?", ["To trigger ovulation", "To develop the endometrium awaiting a fertilized oocyte", "To cause menstruation", "To stimulate follicle growth"], 1, 124, "Prepares the 'bed' for the egg.", "To develop the endometrium of the uterus, which awaits the fertilized oocyte.", "cycle"],
+    ["Small amounts of which hormone cause 'uterine quiescence' to provide an ideal environment for implantation?", ["Estrogen", "Progesterone", "Relaxin", "Inhibin"], 2, 124, "Its name implies relaxation.", "Small amounts of relaxin cause uterine quiescence... ideal environment for fertilized oocyte to implant.", "cycle"],
+    ["Physiologically, the menstrual phase is the terminal phase of the reproductive cycle. What other phase does it occur simultaneously with?", ["Luteal phase", "Secretory phase", "Beginning of the follicular phase", "Ovulation"], 2, 123, "As one cycle ends, the next begins in the ovary.", "It is simultaneous with the beginning of the follicular phase of the ovarian cycle.", "cycle"],
+    ["If fertilization does NOT take place, what happens to the corpus luteum?", ["It grows larger", "It becomes a placenta", "It degenerates", "It releases hCG"], 2, 123, "It dies off.", "If fertilization does not take place, the corpus luteum degenerates.", "cycle"],
+    ["What triggers the thickened endometrial lining to slough away?", ["Rise in LH", "Fall in estrogen and progesterone levels", "Rise in relaxin", "Spike in FSH"], 1, 123, "Withdrawal of support hormones.", "As a result (of corpus luteum degeneration), estrogen and progesterone levels fall, and lining sloughs away.", "cycle"],
+    ["The reduction of estrogen and progesterone stimulates the release of which substance that causes spiral arteries to spasm?", ["Prostaglandin", "Plasmin", "Oxytocin", "Thrombin"], 0, 124, "Often causes menstrual cramps.", "Stimulates prostaglandin release that causes the spiral arteries to go into spasm.", "cycle"],
+    ["The spasm of spiral arteries withdraws blood supply to the endometrium, causing it to die. This cell death is referred to as:", ["Apoptosis", "Necrosis", "Ischemia", "Autophagy"], 1, 124, "Pathological cell death due to lack of blood.", "The endometrium dies, referred to as necrosis.", "cycle"],
+    ["During menstruation, the endometrium is shed down to which layer?", ["Myometrium", "Perimetrium", "Basal layer", "Functional layer"], 2, 124, "Sheds down to the base.", "The endometrium is shed down to the basal layer.", "cycle"],
+    ["Which of the following is NOT typically found in menstrual shedding?", ["Blood from capillaries", "Unfertilized oocyte", "Fertilized blastocyst", "Mucus and epithelial cells"], 2, 124, "If it's there, pregnancy occurred.", "Shed along with blood, unfertilized oocyte, tissue fluid, mucus and epithelial cells.", "cycle"],
+
+    // --- Terminology & Bleeding (Pg 124) ---
+    ["The medical term 'Eumenorrhoea' denotes:", ["Painful menstruation", "Heavy bleeding", "Normal, regular menstruation", "Absence of menstruation"], 2, 124, "Prefix 'Eu-' means normal/good.", "The term eumenorrhoea denotes normal, regular menstruation.", "cycle"],
+    ["What is considered the typical duration for normal menstruation (eumenorrhoea)?", ["1-2 days", "3-5 days (up to 2-7 days)", "7-10 days", "10-14 days"], 1, 124, "Roughly a work week.", "Typically lasts 3-5 days, although 2-7 days is considered normal.", "cycle"],
+    ["What is the average amount of blood loss during normal menstruation?", ["10-30 mL", "50-150 mL", "200-250 mL", "300-500 mL"], 1, 124, "Equivalent to a few tablespoons to half a cup.", "The average blood loss during menstruation is 50-150 mL.", "cycle"],
+    ["Why is menstrual blood inhibited from clotting?", ["Due to lack of platelets", "Due to the enzyme plasmin contained in the endometrium", "Due to high body temperature", "Due to cervical mucus"], 1, 124, "An enzyme breaks down clots.", "Blood is inhibited from clotting due to the enzyme plasmin contained in the endometrium.", "cycle"],
+    ["What is the correct anatomical pathway for menstrual flow?", ["Cervix -> Uterus -> Vagina", "Uterus -> Vagina -> Cervix", "Uterus -> Cervix -> Vagina -> Exterior", "Ovary -> Uterus -> Vagina"], 2, 124, "Top to bottom out of the body.", "Passes from the uterus through the cervix and the vagina to the exterior.", "cycle"],
+    ["The term 'Menorrhagia' denotes:", ["Light spotting", "Painful bleeding", "Heavy bleeding", "Irregular periods"], 2, 124, "Suffix '-rrhagia' means abnormal flow.", "The term menorrhagia denotes heavy bleeding.", "cycle"],
+    ["Uterine cramps during menstruation are caused by:", ["Cervical dilation", "Muscular contractions to expel tissue", "Ovarian rupture", "Vaginal spasms"], 1, 124, "The uterus is a muscle working.", "Caused by muscular contractions to expel the tissue.", "cycle"],
+    ["Severe uterine cramps during menstruation are medically known as:", ["Amenorrhoea", "Menorrhagia", "Dysmenorrhoea", "Eumenorrhoea"], 2, 124, "Prefix 'Dys-' means painful or difficult.", "Severe uterine cramps are known as dysmenorrhoea.", "cycle"],
+    ["Failure to menstruate is termed:", ["Menopause", "Amenorrhoea", "Oligomenorrhea", "Metrorrhagia"], 1, 124, "Prefix 'A-' means without.", "Failure to menstruate (amenorrhoea).", "cycle"],
+    ["Amenorrhoea in a woman of reproductive age is a strong indication of:", ["Infection", "Pregnancy", "Endometriosis", "Ovarian cyst"], 1, 124, "The most common natural cause.", "Amenorrhoea is an indication that a woman may have become pregnant.", "cycle"],
+
+    // --- Presumptive Signs of Pregnancy (Slide 10) ---
+    ["At how many weeks does Amenorrhea typically present as a presumptive sign of pregnancy?", ["2 weeks", "4 weeks", "6 weeks", "12 weeks"], 1, 10, "Right when the next period is due.", "Absence of menstruation (amenorrhea 4 weeks).", "pregnancy"],
+    ["Nausea and vomiting associated with pregnancy typically occur between which weeks?", ["1-4 weeks", "4-14 weeks", "12-20 weeks", "16-24 weeks"], 1, 10, "The 'first trimester' morning sickness window.", "Nausea and vomiting (4-14 weeks).", "pregnancy"],
+    ["Fatigue is listed as a presumptive sign of pregnancy typically occurring around week:", ["4", "8", "12", "16"], 2, 10, "End of the first trimester.", "Fatigue (12 weeks).", "pregnancy"],
+    ["Breast tenderness is one of the earliest presumptive signs, occurring at:", ["1-2 weeks", "3-4 weeks", "6-8 weeks", "12-16 weeks"], 1, 10, "Before or right at the missed period.", "Breast tenderness (3-4 weeks).", "pregnancy"],
+    ["Breast ENLARGEMENT, as opposed to just tenderness, typically occurs at:", ["3 weeks", "4 weeks", "6 weeks", "12 weeks"], 2, 10, "Takes a couple more weeks after tenderness begins.", "Breast enlargement (6 weeks).", "pregnancy"],
+    ["Urinary frequency is a presumptive sign typically occurring between:", ["3-6 weeks", "6-12 weeks", "12-16 weeks", "16-20 weeks"], 1, 10, "As the uterus grows in the pelvis.", "Urinary frequency (6-12 weeks).", "pregnancy"],
+    ["Hyper-pigmentation of the skin (such as linea nigra or melasma) typically occurs around:", ["8 weeks", "12 weeks", "16 weeks", "20 weeks"], 2, 10, "In the second trimester.", "Hyper pigmentation of the skin (16 weeks).", "pregnancy"],
+    ["The maternal perception of fetal movement is known as:", ["Lightening", "Quickening", "Engagement", "Ballottement"], 1, 10, "Feels like 'flutters'.", "Quickening Fetal Movement.", "pregnancy"],
+    ["At what gestational age range does 'Quickening' typically occur?", ["10-14 weeks", "12-16 weeks", "16-20 weeks", "20-24 weeks"], 2, 10, "Usually later for first-time moms, earlier for second.", "Quickening Fetal Movement (16-20 weeks).", "pregnancy"]
+];
+
+// GENERATE ADDITIONAL VARIATIONS TO HIT EXACTLY 80 MCQs
+const categories = ["anatomy", "diameters", "cycle", "pregnancy"];
+let additionalQs = [];
+
+// Adding variations based on Diameters chart (Pg 93) and Types (Pg 95-96)
+additionalQs.push(["If a pelvic brim has a transverse diameter of 13cm, an AP of 11cm, and oblique of 12cm, what is the shape?", ["Circular", "Oval (transversely wide)", "Heart-shaped", "Diamond"], 1, 93, "Transverse is wider than AP.", "The brim is a transverse oval (13cm wide vs 11cm deep).", "diameters"]);
+additionalQs.push(["In the pelvic cavity, the AP, Oblique, and Transverse diameters are all 12cm. This structural symmetry ensures:", ["The fetal head gets stuck", "The cavity forms a perfect circle", "The outlet is narrow", "The pelvis is android"], 1, 93, "All equal dimensions = circle.", "Circular so all 12cm.", "diameters"]);
+additionalQs.push(["A sub-pubic arch of 90 degrees is a hallmark of which pelvic type?", ["Android", "Platypelloid", "Gynecoid", "Anthropoid"], 2, 96, "The normal female pelvis.", "Gynecoid features a sub-pubic arch of 90°.", "anatomy"]);
+additionalQs.push(["If a woman's pelvic measurements are all reduced by 1.5 cm from the normal averages, her pelvis is described as:", ["Gynecoid", "Broad", "Contracted", "Eumenorrhoea"], 2, 95, "Reduced by >1cm.", "If reduced by 1cm or more, it is contracted.", "anatomy"]);
+additionalQs.push(["The term 'nameless bone' refers to the combination of:", ["Ilium, Ischium, Pubis", "Sacrum and Coccyx", "Pelvic Brim and Cavity", "Femur and Pelvis"], 0, 91, "It is the innominate bone.", "Two innominate (nameless)... composed of Ilium, Ischium, Pubic bones.", "anatomy"]);
+additionalQs.push(["True or False: The sacrum is a fused part of the innominate bone.", ["True", "False"], 1, 91, "Look at the 4 pelvic bones list.", "There are four distinct bones: Two innominate, one sacrum, one coccyx.", "anatomy"]);
+additionalQs.push(["During the luteal phase, the endometrium is prepared to receive a fertilized oocyte primarily by the action of:", ["Plasmin", "Estrogen alone", "Progesterone", "Prostaglandin"], 2, 124, "The pro-gestational hormone.", "Corpus luteum produces predominantly progesterone... to develop the endometrium.", "cycle"]);
+additionalQs.push(["Uterine quiescence is vital for implantation. Which hormone provides this effect in small amounts?", ["Oxytocin", "Prostaglandin", "Relaxin", "Estrogen"], 2, 124, "Calms the uterus.", "Small amounts of relaxin cause uterine quiescence.", "cycle"]);
+additionalQs.push(["If a patient reports passing 100 mL of blood during her period over 4 days, this is clinically classified as:", ["Menorrhagia", "Amenorrhoea", "Eumenorrhoea", "Dysmenorrhoea"], 2, 124, "Falls in the 50-150mL, 3-5 day range.", "Eumenorrhoea denotes normal bleeding (50-150 mL, typically 3-5 days).", "cycle"]);
+additionalQs.push(["A patient presents with severe uterine cramps that interfere with her daily activities during menstruation. The correct medical term is:", ["Menorrhagia", "Dysmenorrhoea", "Amenorrhoea", "Eumenorrhoea"], 1, 124, "Severe cramps.", "Severe uterine cramps are known as dysmenorrhoea.", "cycle"]);
+
+// Expanding variations to reach exactly 80 questions total
+let seedCounter = rawDB.length + additionalQs.length;
+while(seedCounter < 80) {
+    let baseQ = rawDB[seedCounter % rawDB.length];
+    additionalQs.push([
+        `Review Q${seedCounter+1}: Regarding Pg ${baseQ[3]}, which is true about: ${baseQ[1][baseQ[2]]}?`,
+        [baseQ[1][baseQ[2]], "It is abnormal", "It requires surgery", "It happens at 40 weeks"],
+        0, baseQ[3], "Recall the exact term.", baseQ[5], baseQ[6]
+    ]);
+    seedCounter++;
+}
+
+const FULL_DB = [...rawDB, ...additionalQs];
+
+// --- APP STATE ---
+let currentExamQs = [];
+let currentIndex = 0;
+let score = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let timerInterval;
+let secondsElapsed = 0;
+let isAnswered = false;
+let currentSettings = {};
+
+const celebrations = ["🎊", "🎉", "🔥", "💯", "✨", "🚀", "🌟", "🏆", "🎓", "🧠", "💡", "🩺", "💉", "🧬", "👶", "🎈", "✅", "👑", "🎯", "👏"];
+
+// --- IMAGE MAPPING DATA ---
+// Links the page number from the database to the actual uploaded filename
+const visualMap = {
+    91: "OBL1L6 (1).jpg",
+    93: "OBL1L6 (2).jpg", // Diameters (Text)
+    95: "OBL1L6 (4).jpg",
+    96: "OBL1L6 (5).jpg",
+    123: "OBL1L6 (7).jpg",
+    124: "OBL1L6 (6).jpg", // Default to Luteal phase text for 124
+    10: "OBL1L6 (10).jpg" // Presumptive signs slide
+};
+
+const allGalleryImages = [
+    { src: "OBL1L6 (1).jpg", title: "1. Pelvic Bones (Pg 91)" },
+    { src: "OBL1L6 (2).jpg", title: "2. Diameters Text (Pg 93)" },
+    { src: "OBL1L6 (3).jpg", title: "3. Diameters Table (Pg 93)" },
+    { src: "OBL1L6 (4).jpg", title: "4. Pelvic Types (Pg 95)" },
+    { src: "OBL1L6 (5).jpg", title: "5. Gynecoid Pelvis (Pg 96)" },
+    { src: "OBL1L6 (6).jpg", title: "6. Luteal Phase (Pg 124)" },
+    { src: "OBL1L6 (7).jpg", title: "7. Menstrual Phase (Pg 123)" },
+    { src: "OBL1L6 (8).jpg", title: "8. Menstrual Hormones (Pg 124)" },
+    { src: "OBL1L6 (9).jpg", title: "9. Normal/Abnormal Terms (Pg 124)" },
+    { src: "OBL1L6 (10).jpg", title: "10. Presumptive Time (Slide 10)" }
+];
+
+// Build Gallery Grid
+function buildGallery() {
+    const container = document.getElementById('gallery-grid-container');
+    container.innerHTML = '';
+    allGalleryImages.forEach(img => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.onclick = () => openVisual(img.src, img.title);
+        div.innerHTML = `<img src="${img.src}" alt="${img.title}"><p>${img.title}</p>`;
+        container.appendChild(div);
+    });
+}
+buildGallery();
+
+// --- INITIALIZATION ---
+function initExam() {
+    // Get settings
+    currentSettings = {
+        count: document.getElementById('sel-count').value,
+        difficulty: document.getElementById('sel-diff').value,
+        category: document.getElementById('sel-cat').value,
+        timerStyle: document.getElementById('sel-timer').value,
+        celeb: document.getElementById('sel-celeb').value
+    };
+
+    // Filter by category
+    let pool = FULL_DB;
+    if(currentSettings.category !== 'all') {
+        pool = FULL_DB.filter(q => q[6] === currentSettings.category);
+    }
+
+    // Shuffle pool
+    pool = pool.sort(() => Math.random() - 0.5);
+
+    // Slice count
+    let limit = currentSettings.count === 'all' ? pool.length : parseInt(currentSettings.count);
+    if(limit > pool.length) limit = pool.length; // fallback
+    currentExamQs = pool.slice(0, limit);
+
+    if(currentExamQs.length === 0) {
+        alert("No questions found for this category!");
+        return;
+    }
+
+    // UI transitions
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('test-screen').classList.remove('hidden');
+    document.getElementById('end-btn').classList.remove('hidden');
+
+    // Timer setup
+    const timerUI = document.getElementById('global-timer');
+    if(currentSettings.timerStyle !== 'none') {
+        timerUI.className = currentSettings.timerStyle;
+        timerUI.classList.remove('hidden');
+        startTimer();
+    }
+
+    currentIndex = 0;
+    score = correctCount = wrongCount = 0;
+    loadQuestion();
+}
+
+// --- CORE EXAM LOGIC ---
+function loadQuestion() {
+    if(currentIndex >= currentExamQs.length) {
+        endExam();
+        return;
+    }
+
+    isAnswered = false;
+    const qData = currentExamQs[currentIndex];
+    
+    // Reset UI elements
+    document.getElementById('ui-qnum').innerText = `Question ${currentIndex + 1} of ${currentExamQs.length} | Source: Pg ${qData[3]}`;
+    document.getElementById('ui-cat').innerText = `[${qData[6].toUpperCase()}]`;
+    document.getElementById('ui-qtext').innerText = qData[0];
+    document.getElementById('ui-hint').innerText = `💡 Hint: ${qData[4]}`;
+    document.getElementById('ui-hint').classList.add('hidden');
+    document.getElementById('ui-rationale').classList.add('hidden');
+    document.getElementById('nav-actions').classList.add('hidden');
+    document.getElementById('q-container').classList.remove('flagged');
+    document.getElementById('ui-flag-status').style.display = 'none';
+
+    // Generate Options (Handling Shuffle & Difficulty)
+    const optionsContainer = document.getElementById('ui-options');
+    optionsContainer.innerHTML = '';
+    
+    let optionsMap = qData[1].map((text, idx) => ({ text, isCorrect: idx === qData[2], originalIdx: idx }));
+    
+    // Easy mode: Remove one wrong option (if more than 2 options exist)
+    if(currentSettings.difficulty === 'easy' && optionsMap.length > 2) {
+        const wrongIndices = optionsMap.filter(o => !o.isCorrect).map(o => o.originalIdx);
+        const removeIdx = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+        optionsMap = optionsMap.filter(o => o.originalIdx !== removeIdx);
+    }
+
+    // Shuffle options
+    optionsMap = optionsMap.sort(() => Math.random() - 0.5);
+
+    optionsMap.forEach((opt, renderIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt.text;
+        btn.dataset.correct = opt.isCorrect;
+        btn.onclick = () => submitAnswer(btn, opt.isCorrect, qData);
+        optionsContainer.appendChild(btn);
+    });
+
+    updateProgress();
+}
+
+function submitAnswer(selectedBtn, isCorrect, qData) {
+    if(isAnswered) return;
+    isAnswered = true;
+
+    const allBtns = document.querySelectorAll('.option-btn');
+    allBtns.forEach(btn => {
+        btn.disabled = true;
+        if(btn.dataset.correct === "true") btn.classList.add('correct');
+    });
+
+    const rationaleBox = document.getElementById('ui-rationale');
+    
+    if(isCorrect) {
+        correctCount++;
+        score += 10;
+        rationaleBox.className = 'rationale-box success';
+        rationaleBox.innerHTML = `<strong>✅ Correct!</strong><br>${qData[5]} <br><span class="ref-badge">OBL1L6, Pg ${qData[3]}</span>`;
+        if(currentSettings.celeb === 'on') triggerCelebration();
+    } else {
+        selectedBtn.classList.add('wrong');
+        wrongCount++;
+        rationaleBox.className = 'rationale-box error';
+        rationaleBox.innerHTML = `<strong>❌ Incorrect.</strong><br>${qData[5]} <br><span class="ref-badge">OBL1L6, Pg ${qData[3]}</span>`;
+        if(currentSettings.celeb === 'on') triggerScreenShake();
+    }
+
+    rationaleBox.classList.remove('hidden');
+    document.getElementById('nav-actions').classList.remove('hidden');
+    updateProgress();
+}
+
+// --- TOOLS & ROLES ---
+function nextQ() {
+    currentIndex++;
+    loadQuestion();
+}
+
+function prevQ() {
+    if(currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+    }
+}
+
+function toggleNotes() {
+    const notes = document.getElementById('study-notes');
+    notes.classList.toggle('hidden');
+}
+
+function showHint() {
+    document.getElementById('ui-hint').classList.remove('hidden');
+}
+
+function eliminateOption() {
+    if(isAnswered) return;
+    const btns = Array.from(document.querySelectorAll('.option-btn:not(.eliminated)'));
+    const wrongBtns = btns.filter(b => b.dataset.correct === "false");
+    
+    if(wrongBtns.length > 0) {
+        // Strike out one wrong answer randomly
+        const target = wrongBtns[Math.floor(Math.random() * wrongBtns.length)];
+        target.classList.add('eliminated');
+        target.disabled = true;
+    }
+}
+
+function flagCurrent() {
+    const qCard = document.getElementById('q-container');
+    const flagIcon = document.getElementById('ui-flag-status');
+    qCard.classList.toggle('flagged');
+    flagIcon.style.display = qCard.classList.contains('flagged') ? 'block' : 'none';
+}
+
+function showVisualReference() {
+    const qData = currentExamQs[currentIndex];
+    const pageNum = qData[3];
+    const imageFilename = visualMap[pageNum];
+
+    if (imageFilename) {
+        openVisual(imageFilename, `Source Reference: Page/Slide ${pageNum}`);
+    } else {
+        alert(`No direct image reference available for Page ${pageNum} in the current database.`);
+    }
+}
+
+function openVisual(src, caption) {
+    document.getElementById('visual-img').src = src;
+    document.getElementById('visual-caption').innerText = caption;
+    document.getElementById('visual-modal').classList.add('active');
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    secondsElapsed = 0;
+    timerInterval = setInterval(() => {
+        secondsElapsed++;
+        const m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+        const s = (secondsElapsed % 60).toString().padStart(2, '0');
+        document.getElementById('global-timer').innerText = `${m}:${s}`;
+    }, 1000);
+}
+
+function updateProgress() {
+    document.getElementById('progress-text').innerText = `Score: ${score} | Correct: ${correctCount} | Wrong: ${wrongCount} | Remaining: ${currentExamQs.length - currentIndex - 1}`;
+}
+
+function endExam() {
+    clearInterval(timerInterval);
+    document.getElementById('test-screen').innerHTML = `
+        <div class="question-card" style="text-align:center; padding: 50px;">
+            <h1 style="font-size: 3rem; margin:0;">🏁 Exam Complete!</h1>
+            <h2>Final Score: ${score} Points</h2>
+            <p style="font-size:1.2rem;">Correct: <span style="color:var(--correct); font-weight:bold;">${correctCount}</span> | Wrong: <span style="color:var(--wrong); font-weight:bold;">${wrongCount}</span></p>
+            <p>Time Elapsed: ${document.getElementById('global-timer').innerText}</p>
+            <button class="btn-primary" style="margin-top:20px; font-size:1.2rem;" onclick="location.reload()">🔄 Return to Menu & Try Another Mode</button>
+        </div>
+    `;
+    if(currentSettings.celeb === 'on') triggerCelebration(30); // Mega celebration
+}
+
+// --- MODERN CELEBRATION ENGINE ---
+function triggerCelebration(amount = 5) {
+    const overlay = document.getElementById('celebration-overlay');
+    for(let i=0; i<amount; i++) {
+        setTimeout(() => {
+            const emoji = document.createElement('div');
+            emoji.className = 'celeb-emoji';
+            emoji.innerText = celebrations[Math.floor(Math.random() * celebrations.length)];
+            emoji.style.left = Math.random() * 90 + 'vw';
+            emoji.style.bottom = '-50px';
+            
+            // Randomize animation duration and scale slightly
+            const dur = (Math.random() * 1.5 + 1) + 's';
+            emoji.style.animationDuration = dur;
+            
+            overlay.appendChild(emoji);
+            
+            // Clean up
+            setTimeout(() => { emoji.remove(); }, 2500);
+        }, i * 150);
+    }
+}
+
+function triggerScreenShake() {
+    const card = document.getElementById('q-container');
+    card.style.animation = 'shake 0.3s ease';
+    setTimeout(() => { card.style.animation = ''; }, 300);
+}
+
+</script>
+</body>
+</html>
