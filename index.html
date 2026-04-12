@@ -133,6 +133,16 @@
     </div>
 </div>
 
+<!-- Full 32-Page PDF Review Modal -->
+<div id="pdf-modal" class="modal">
+    <div class="modal-content" style="width: 95%; height: 95vh; max-width: none;">
+        <h2 style="margin-top: 0; color: var(--primary);">📄 Full PDF Document Review</h2>
+        <p style="margin-top: 0; font-size: 0.9rem; opacity: 0.8;">Reviewing: <strong>OB mid term.pdf</strong> (32 Slides)</p>
+        <iframe src="OB mid term.pdf" style="width: 100%; flex-grow: 1; border: 2px solid var(--primary); border-radius: 8px;"></iframe>
+        <button class="close-modal" onclick="document.getElementById('pdf-modal').classList.remove('active')">Close PDF Viewer</button>
+    </div>
+</div>
+
 <!-- Top Navigation -->
 <div id="top-bar">
     <h2 style="margin:0;">🩺 OB/GYN Master</h2>
@@ -297,6 +307,7 @@
                         <option value="diameters">Pelvic Diameters</option>
                         <option value="cycle">Menstrual & Luteal Cycle</option>
                         <option value="pregnancy">Presumptive Signs</option>
+                        <option value="complications">OB Complications (Previa, GDM, etc)</option>
                     </select>
                 </div>
                 <div class="control-group">
@@ -327,6 +338,7 @@
                 <button class="tool-btn" onclick="eliminateOption()">✂️ Eliminate (50/50)</button>
                 <button class="tool-btn" onclick="showVisualReference()" style="background: var(--primary); color: white; border:none;">🖼️ Question Slide Ref</button>
                 <button class="tool-btn" onclick="document.getElementById('gallery-modal').classList.add('active')" style="background: var(--accent); color: white; border:none;">🖼️ Review All Slides</button>
+                <button class="tool-btn" onclick="document.getElementById('pdf-modal').classList.add('active')" style="background: var(--correct); color: white; border:none; font-weight:bold;">📄 View Full PDF (32 Slides)</button>
                 <button class="tool-btn" onclick="flagCurrent()">🚩 Flag for Review</button>
                 <div style="flex-grow: 1;"></div>
                 <button class="tool-btn" onclick="prevQ()">⬅️ Prev</button>
@@ -450,8 +462,27 @@ const rawDB = [
     ["At what gestational age range does 'Quickening' typically occur?", ["10-14 weeks", "12-16 weeks", "16-20 weeks", "20-24 weeks"], 2, 10, "Usually later for first-time moms, earlier for second.", "Quickening Fetal Movement (16-20 weeks).", "pregnancy"]
 ];
 
+// NEW ADDITIONS FROM FULL PDF (PAGES 11-32)
+const pdfNewQs = [
+    ["Which of the following is considered a PROBABLE (Objective) sign of pregnancy?", ["Nausea and vomiting", "Quickening", "Positive pregnancy test", "Fatigue"], 2, 12, "Tests are objective but can have false positives.", "Positive pregnancy test (4-12 weeks) is a probable sign. Others are presumptive.", "pregnancy"],
+    ["What is Hegar's sign?", ["Bluish coloration of cervix", "Softening of the lower uterine segment", "Pulsations in vaginal fornix", "Fetal movement"], 1, 13, "Felt during bimanual exam.", "Softening of the lower uterine segment or isthmus (6-12 weeks).", "pregnancy"],
+    ["A bluish-purple coloration of the vaginal mucosa and cervix at 6-8 weeks gestation is known as:", ["Goodell's sign", "Hegar's sign", "Chadwick's sign", "Osiander's sign"], 2, 14, "Also known as Jacquemier's sign.", "Chadwick's sign (6-8 weeks) is caused by greatly increased blood supply.", "pregnancy"],
+    ["Osiander's sign is described as:", ["Softening of the cervix", "Stronger pulsations felt in the lateral vaginal fornix", "Abdominal enlargement", "Braxton Hicks contractions"], 1, 15, "Due to increased blood supply from uterine artery.", "Stronger pulsations can be felt in the lateral vaginal fornix.", "pregnancy"],
+    ["A threatened miscarriage (abortion) is characterized by vaginal bleeding in early pregnancy with:", ["An open cervical os", "A closed cervical os", "Severe knife-like pain", "Expulsion of tissue"], 1, 16, "The pregnancy is still viable 80% of the time.", "The cervical os remains closed.", "complications"],
+    ["The classic clinical triad of an ectopic pregnancy includes abdominal pain, vaginal bleeding, and:", ["Fever", "Amenorrhea", "Hypertension", "Seizures"], 1, 18, "Missed period.", "The classic triad includes abdominal pain, amenorrhea, and vaginal bleeding.", "complications"],
+    ["Placenta previa is characterized by which classic presentation?", ["Painful, dark-red bleeding", "Painless, bright-red bleeding", "Uterine tenderness and contractions", "Absent fetal heart rate"], 1, 21, "Always unprovoked and fresh.", "Onset almost always unprovoked, painless, bleeding is fresh (bright red).", "complications"],
+    ["A patient presents with 'knife-like' abdominal pain and painful, dark-red vaginal bleeding. This is classic for:", ["Placenta Previa", "Threatened Abortion", "Ectopic Pregnancy", "Abruptio Placenta"], 3, 22, "Bleeding comes from clot behind placenta.", "Painful, dark-red vaginal bleeding and knife-like pain indicates Abruptio Placenta.", "complications"],
+    ["Severe preeclampsia is indicated by a blood pressure of more than 160/110 mm Hg and proteinuria of more than:", ["300 mg in 24 hrs", "1 g in 24 hrs", "5 g in 24 hrs", "10 g in 24 hrs"], 2, 24, "Massive protein loss.", "Proteinuria of more than 5 g in 24 hours signals severe preeclampsia.", "complications"],
+    ["Which medication is administered intravenously to prevent further seizures in eclampsia?", ["Calcium gluconate", "Oxytocin", "Magnesium sulfate", "Insulin"], 2, 26, "Used to prevent convulsions.", "Magnesium sulfate is administered IV to prevent further seizures.", "complications"],
+    ["What is the typical screening method for Gestational Diabetes Mellitus (GDM) at 24-28 weeks?", ["Fasting blood sugar", "75-g 1-hour glucose challenge test", "HbA1c only", "Urine dipstick"], 1, 27, "Standard glucose load.", "Typically screening is based on a 75-g 1-hour glucose challenge test.", "complications"],
+    ["Which medication is the treatment of choice for pregnant and lactating women with diabetes because it does NOT cross the placenta?", ["Metformin", "Glyburide", "Insulin", "Glipizide"], 2, 29, "Injectable standard.", "Insulin is the medication of choice... it doesn't cross placenta.", "complications"],
+    ["Perinatal complications for an infant born to a mother with GDM include all EXCEPT:", ["Macrosomia", "Neonatal hypoglycemia", "Respiratory distress syndrome", "Hypercalcemia"], 3, 32, "It causes hypocalcemia, not hyper.", "Risks include hypoglycemia, hyperbilirubinemia, macrosomia, hypocalcemia.", "complications"]
+];
+
+rawDB.push(...pdfNewQs);
+
 // GENERATE ADDITIONAL VARIATIONS TO HIT EXACTLY 80 MCQs
-const categories = ["anatomy", "diameters", "cycle", "pregnancy"];
+const categories = ["anatomy", "diameters", "cycle", "pregnancy", "complications"];
 let additionalQs = [];
 
 // Adding variations based on Diameters chart (Pg 93) and Types (Pg 95-96)
@@ -505,18 +536,25 @@ const visualMap = {
     10: "OBL1L6 (10).jpg" // Presumptive signs slide
 };
 
-const allGalleryImages = [
-    { src: "OBL1L6 (1).jpg", title: "1. Pelvic Bones (Pg 91)" },
-    { src: "OBL1L6 (2).jpg", title: "2. Diameters Text (Pg 93)" },
-    { src: "OBL1L6 (3).jpg", title: "3. Diameters Table (Pg 93)" },
-    { src: "OBL1L6 (4).jpg", title: "4. Pelvic Types (Pg 95)" },
-    { src: "OBL1L6 (5).jpg", title: "5. Gynecoid Pelvis (Pg 96)" },
-    { src: "OBL1L6 (6).jpg", title: "6. Luteal Phase (Pg 124)" },
-    { src: "OBL1L6 (7).jpg", title: "7. Menstrual Phase (Pg 123)" },
-    { src: "OBL1L6 (8).jpg", title: "8. Menstrual Hormones (Pg 124)" },
-    { src: "OBL1L6 (9).jpg", title: "9. Normal/Abnormal Terms (Pg 124)" },
-    { src: "OBL1L6 (10).jpg", title: "10. Presumptive Time (Slide 10)" }
-];
+const allGalleryImages = Array.from({length: 32}, (_, i) => {
+    const slideNum = i + 1;
+    // We have images for slides 1-10
+    if (slideNum <= 10) {
+        const titles = [
+            "1. Pelvic Bones (Pg 91)", "2. Diameters Text (Pg 93)", "3. Diameters Table (Pg 93)",
+            "4. Pelvic Types (Pg 95)", "5. Gynecoid Pelvis (Pg 96)", "6. Luteal Phase (Pg 124)",
+            "7. Menstrual Phase (Pg 123)", "8. Menstrual Hormones (Pg 124)", "9. Normal/Abnormal Terms (Pg 124)",
+            "10. Presumptive Time (Slide 10)"
+        ];
+        return { src: `OBL1L6 (${slideNum}).jpg`, title: titles[slideNum-1] };
+    } else {
+        // Placeholders for the remaining 22 unuploaded slides
+        return { 
+            src: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'><rect width='400' height='200' fill='%23f1f5f9'/><text x='200' y='100' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='sans-serif'>Slide ${slideNum} (Pending Upload)</text></svg>`, 
+            title: `Slide ${slideNum} (Missing)` 
+        };
+    }
+});
 
 // Build Gallery Grid
 function buildGallery() {
