@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OB/GYN Master: Pelvis & Menstrual Cycle</title>
     <style>
         /* === THEMES (10 Options) === */
@@ -17,7 +17,7 @@
         [data-theme="neon"] { --bg: #1a0b2e; --text: #f87171; --card: #2d1b4e; --primary: #a78bfa; --accent: #34d399; }
         [data-theme="hacker"] { --bg: #0a0a0a; --text: #22c55e; --card: #171717; --primary: #22c55e; --font: 'Consolas', monospace; }
 
-        body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); transition: 0.3s; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); transition: 0.3s; height: 100vh; display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
         
         /* RTL Support for Arabic */
         body.rtl { direction: rtl; text-align: right; }
@@ -30,39 +30,42 @@
         
         /* === LAYOUT === */
         #top-bar { padding: 15px 25px; background: var(--card); border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); z-index: 10; flex-wrap: wrap; gap: 10px; }
-        #app-body { display: flex; flex: 1; overflow: hidden; }
+        #app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
         
         /* Split Screen (Notes) */
-        #study-notes { width: 350px; background: var(--card); border-right: 1px solid var(--primary); padding: 20px; overflow-y: auto; transition: 0.3s; }
+        #study-notes { width: 350px; background: var(--card); border-right: 1px solid var(--primary); padding: 20px; overflow-y: auto; transition: 0.3s; z-index: 5; }
         body.rtl #study-notes { border-right: none; border-left: 1px solid var(--primary); }
         .note-card { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
         .note-card h4 { margin: 0 0 10px 0; display: flex; align-items: center; gap: 5px; font-size: 0.95rem; }
         .note-thumb { width: 100%; border-radius: 5px; margin-top: 10px; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); transition: transform 0.2s; }
         .note-thumb:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .mobile-close-notes { display: none; background: var(--wrong); color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; }
         
         /* Main Exam Area */
-        #exam-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
-        #setup-screen { max-width: 800px; width: 100%; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: auto; }
+        #exam-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; -webkit-overflow-scrolling: touch; }
+        #setup-screen { max-width: 800px; width: 100%; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: auto; box-sizing: border-box;}
         #test-screen { max-width: 800px; width: 100%; display: flex; flex-direction: column; gap: 15px; }
         
         /* Tools & Controls */
         .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .control-group { display: flex; flex-direction: column; gap: 5px; }
-        select, input, .btn-primary { padding: 10px; border-radius: 8px; border: 1px solid var(--primary); background: var(--bg); color: var(--text); }
-        .btn-primary { background: var(--primary); color: var(--bg); font-weight: bold; }
+        select, input, .btn-primary { padding: 12px; border-radius: 8px; border: 1px solid var(--primary); background: var(--bg); color: var(--text); font-size: 1rem; }
+        .btn-primary { background: var(--primary); color: var(--bg); font-weight: bold; min-height: 44px; } /* 44px min for touch */
         .btn-primary:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn-primary:active { transform: translateY(0); }
         .toolbar { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; background: var(--card); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); align-items: center;}
-        .tool-btn { padding: 8px 15px; border-radius: 20px; background: rgba(0,0,0,0.05); color: var(--text); border: 1px solid var(--primary); font-size: 0.9rem; }
+        .tool-btn { padding: 10px 15px; border-radius: 20px; background: rgba(0,0,0,0.05); color: var(--text); border: 1px solid var(--primary); font-size: 0.95rem; min-height: 40px; display: flex; align-items: center; justify-content: center; }
         .tool-btn:hover { background: var(--primary); color: white; }
+        .tool-btn:active { background: var(--primary); opacity: 0.8; }
         
         /* Quiz Elements */
-        .question-card { background: var(--card); padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); position: relative;}
-        .meta-tag { display: inline-block; padding: 4px 10px; border-radius: 12px; background: var(--primary); color: var(--bg); font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; }
-        .difficulty-tag { display: inline-block; padding: 4px 10px; border-radius: 12px; background: var(--accent); color: white; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; margin-left: 5px;}
-        h2.q-text { font-size: 1.4rem; line-height: 1.5; margin-top: 0; }
+        .question-card { background: var(--card); padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); position: relative; box-sizing: border-box; width: 100%;}
+        .meta-tag { display: inline-block; padding: 6px 12px; border-radius: 12px; background: var(--primary); color: var(--bg); font-size: 0.8rem; font-weight: bold; margin-bottom: 15px; }
+        .difficulty-tag { display: inline-block; padding: 6px 12px; border-radius: 12px; background: var(--accent); color: white; font-size: 0.8rem; font-weight: bold; margin-bottom: 15px; margin-left: 5px;}
+        h2.q-text { font-size: 1.3rem; line-height: 1.5; margin-top: 0; }
         
-        .options-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .option-btn { padding: 15px 20px; text-align: left; background: var(--bg); border: 2px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 1.1rem; color: var(--text); font-weight: 500; }
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .option-btn { padding: 18px 20px; text-align: left; background: var(--bg); border: 2px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 1.1rem; color: var(--text); font-weight: 500; min-height: 55px; } /* Touch friendly */
         .option-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(0,0,0,0.02); transform: translateX(5px); }
         body.rtl .option-btn:hover:not(:disabled) { transform: translateX(-5px); }
         .option-btn.correct { background: var(--correct); color: white; border-color: var(--correct); }
@@ -70,11 +73,11 @@
         .option-btn.eliminated { opacity: 0.3; text-decoration: line-through; pointer-events: none; }
         
         /* Rationale & Hints */
-        .hint-box { margin-top: 15px; padding: 15px; background: rgba(245, 158, 11, 0.1); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 0.95rem; animation: slideIn 0.3s ease; }
-        .rationale-box { margin-top: 20px; padding: 20px; border-radius: 8px; font-size: 1rem; line-height: 1.5; animation: slideIn 0.3s ease; }
+        .hint-box { margin-top: 15px; padding: 15px; background: rgba(245, 158, 11, 0.1); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 1rem; animation: slideIn 0.3s ease; }
+        .rationale-box { margin-top: 20px; padding: 20px; border-radius: 8px; font-size: 1.05rem; line-height: 1.5; animation: slideIn 0.3s ease; }
         .rationale-box.success { background: rgba(34, 197, 94, 0.1); border: 1px solid var(--correct); }
         .rationale-box.error { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--wrong); }
-        .ref-badge { display: inline-block; background: var(--text); color: var(--bg); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-top: 10px; }
+        .ref-badge { display: inline-block; background: var(--text); color: var(--bg); padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; margin-top: 10px; font-weight: bold;}
         
         /* Timers */
         .timer-small { font-size: 1rem; font-weight: bold; }
@@ -86,15 +89,15 @@
         .celeb-emoji { position: absolute; font-size: 3rem; animation: floatUp 2s ease-out forwards; }
         
         /* Modals (Visual Reference & Gallery) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
         .modal.active { display: flex; }
-        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; text-align: center; max-width: 95%; max-height: 95vh; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-        #visual-img { max-width: 100%; max-height: 70vh; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .close-modal { background: var(--wrong); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; margin-top: 15px;}
+        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; text-align: center; max-width: 95%; max-height: 95vh; display: flex; flex-direction: column; align-items: center; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        #visual-img { max-width: 100%; max-height: 60vh; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); object-fit: contain; }
+        .close-modal { background: var(--wrong); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; margin-top: 15px; width: 100%; max-width: 300px; min-height: 44px;}
         .close-modal:hover { opacity: 0.8; }
         
         /* Gallery Grid */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 100%; margin-top: 15px; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%; margin-top: 15px; }
         .gallery-item { background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .gallery-item:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .gallery-item img { width: 100%; border-radius: 5px; }
@@ -105,6 +108,32 @@
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         
         .flagged { box-shadow: 0 0 15px var(--accent) !important; border: 2px solid var(--accent); }
+
+        /* =========================================
+           MOBILE & TABLET RESPONSIVENESS
+           ========================================= */
+        @media (max-width: 768px) {
+            #top-bar { flex-direction: column; align-items: stretch; text-align: center; }
+            .toolbar { justify-content: center; }
+            .tool-btn { flex: 1 1 45%; } /* Make tools larger on mobile */
+            
+            #app-body { flex-direction: column; }
+            
+            /* Turn Split Screen Notes into a Mobile Modal Drawer */
+            #study-notes { 
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                max-width: none; border: none; z-index: 9999; 
+                padding: 20px; padding-bottom: 80px; box-sizing: border-box;
+            }
+            .mobile-close-notes { display: block; }
+            
+            .question-card { padding: 20px; }
+            h2.q-text { font-size: 1.15rem; }
+            .option-btn { font-size: 1rem; padding: 15px; }
+            
+            /* Google Translate widget fix for mobile */
+            #google_translate_element select { width: 100%; max-width: 200px; padding: 5px; }
+        }
     </style>
 </head>
 <body data-theme="minimal">
@@ -123,7 +152,7 @@
 
 <!-- All Images Gallery Modal -->
 <div id="gallery-modal" class="modal">
-    <div class="modal-content" style="width: 900px;">
+    <div class="modal-content" style="max-width: 900px;">
         <h2 style="margin-top: 0;">🖼️ Full Slide Gallery Review</h2>
         <p>Click any slide to view it in detail.</p>
         <div class="gallery-grid" id="gallery-grid-container">
@@ -135,10 +164,22 @@
 
 <!-- Full 32-Page PDF Review Modal -->
 <div id="pdf-modal" class="modal">
-    <div class="modal-content" style="width: 95%; height: 95vh; max-width: none;">
+    <div class="modal-content" style="width: 100%; height: 100vh; max-width: none; border-radius: 0; display: flex; flex-direction: column;">
         <h2 style="margin-top: 0; color: var(--primary);">📄 Full PDF Document Review</h2>
         <p style="margin-top: 0; font-size: 0.9rem; opacity: 0.8;">Reviewing: <strong>OB mid term.pdf</strong> (32 Slides)</p>
-        <iframe src="OB mid term.pdf" style="width: 100%; flex-grow: 1; border: 2px solid var(--primary); border-radius: 8px;"></iframe>
+        
+        <!-- Mobile/Tablet Fallback Button for iOS Iframe Issues -->
+        <div style="margin-bottom: 15px;">
+            <a href="OB mid term.pdf" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-block; padding: 10px 20px; border-radius: 20px;">
+                📱 Open PDF in New Tab (Best for iPhone/iPad)
+            </a>
+        </div>
+
+        <!-- Iframe with Webkit Scrolling for iOS Touch -->
+        <div style="flex-grow: 1; width: 100%; overflow: auto; -webkit-overflow-scrolling: touch; border: 2px solid var(--primary); border-radius: 8px;">
+            <iframe src="OB mid term.pdf" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+        
         <button class="close-modal" onclick="document.getElementById('pdf-modal').classList.remove('active')">Close PDF Viewer</button>
     </div>
 </div>
@@ -148,14 +189,14 @@
     <h2 style="margin:0;">🩺 OB/GYN Master</h2>
     
     <!-- Translation Controls -->
-    <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.05); padding: 5px 15px; border-radius: 8px;">
+    <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.05); padding: 5px 15px; border-radius: 8px; flex-wrap: wrap; justify-content: center;">
         <div id="google_translate_element"></div>
-        <button class="tool-btn" onclick="document.body.classList.toggle('rtl')" style="background: var(--primary); color: white; border:none; padding: 5px 10px;">
+        <button class="tool-btn" onclick="document.body.classList.toggle('rtl')" style="background: var(--primary); color: white; border:none; padding: 8px 15px; margin: 0;">
             🔄 RTL / LTR (محاذاة النص)
         </button>
     </div>
 
-    <div style="display: flex; gap: 15px; align-items: center;">
+    <div style="display: flex; gap: 15px; align-items: center; justify-content: center;">
         <span id="global-timer" class="timer-big hidden">00:00</span>
         <button class="tool-btn hidden" id="end-btn" onclick="endExam()" style="background: var(--wrong); color: white; border: none;">End Exam</button>
     </div>
@@ -164,6 +205,7 @@
 <div id="app-body">
     <!-- SPLIT SCREEN: Comprehensive Study Notes for All Images -->
     <div id="study-notes" class="hidden">
+        <button class="mobile-close-notes" onclick="toggleNotes()">❌ Close Notes & Return to Exam</button>
         <h3>📚 Quick Review Notes</h3>
         <p style="font-size: 0.8rem; opacity: 0.8;">Click any thumbnail to expand.</p>
         
@@ -333,14 +375,14 @@
         <!-- EXAM SCREEN -->
         <div id="test-screen" class="hidden">
             <div class="toolbar">
-                <button class="tool-btn" onclick="toggleNotes()">📖 Split Screen (Notes)</button>
-                <button class="tool-btn" onclick="showHint()">💡 Obvious Hint</button>
-                <button class="tool-btn" onclick="eliminateOption()">✂️ Eliminate (50/50)</button>
-                <button class="tool-btn" onclick="showVisualReference()" style="background: var(--primary); color: white; border:none;">🖼️ Question Slide Ref</button>
-                <button class="tool-btn" onclick="document.getElementById('gallery-modal').classList.add('active')" style="background: var(--accent); color: white; border:none;">🖼️ Review All Slides</button>
-                <button class="tool-btn" onclick="document.getElementById('pdf-modal').classList.add('active')" style="background: var(--correct); color: white; border:none; font-weight:bold;">📄 View Full PDF (32 Slides)</button>
-                <button class="tool-btn" onclick="flagCurrent()">🚩 Flag for Review</button>
-                <div style="flex-grow: 1;"></div>
+                <button class="tool-btn" onclick="toggleNotes()">📖 Study Notes</button>
+                <button class="tool-btn" onclick="showHint()">💡 Hint</button>
+                <button class="tool-btn" onclick="eliminateOption()">✂️ Eliminate</button>
+                <button class="tool-btn" onclick="showVisualReference()" style="background: var(--primary); color: white; border:none;">🖼️ Question Slide</button>
+                <button class="tool-btn" onclick="document.getElementById('gallery-modal').classList.add('active')" style="background: var(--accent); color: white; border:none;">🖼️ Slides Gallery</button>
+                <button class="tool-btn" onclick="document.getElementById('pdf-modal').classList.add('active')" style="background: var(--correct); color: white; border:none; font-weight:bold;">📄 View Full PDF</button>
+                <button class="tool-btn" onclick="flagCurrent()">🚩 Flag</button>
+                <div style="flex-grow: 1; min-width: 100%; height: 0;"></div> <!-- Force wrap on mobile -->
                 <button class="tool-btn" onclick="prevQ()">⬅️ Prev</button>
                 <button class="tool-btn" onclick="nextQ()">Skip/Next ➡️</button>
             </div>
@@ -367,11 +409,11 @@
                 </div>
                 
                 <div id="nav-actions" class="hidden" style="margin-top: 20px; text-align: right;">
-                    <button class="btn-primary" onclick="nextQ()">Next Question ➡️</button>
+                    <button class="btn-primary" onclick="nextQ()" style="width: 100%;">Next Question ➡️</button>
                 </div>
             </div>
             
-            <div style="text-align: center; margin-top: 10px; opacity: 0.6; font-size: 0.9rem;">
+            <div style="text-align: center; margin-top: 10px; padding-bottom: 30px; opacity: 0.6; font-size: 0.95rem; font-weight: bold;">
                 <span id="progress-text">Score: 0 | Correct: 0 | Wrong: 0</span>
             </div>
         </div>
